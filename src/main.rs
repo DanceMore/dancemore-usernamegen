@@ -1,4 +1,4 @@
-use std::env
+use std::env;
 
 use std::hash::Hasher;
 use std::collections::hash_map::DefaultHasher;
