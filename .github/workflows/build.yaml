@@ -6,29 +6,6 @@ on:
       - main
 
 jobs:
-  create-release:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Set release tag
-        id: set_tag
-        run: |
-          tag=$(git rev-parse --short=8 ${{ github.sha }})
-          echo "::set-output name=tag::${tag}"
-
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ steps.set_tag.outputs.tag }}
-          release_name: ${{ steps.set_tag.outputs.tag }}
-          body: ${{ steps.create_release.outputs.message }}
-          draft: false
-          prerelease: false
-
   build-freebsd:
     runs-on: ubuntu-latest
     needs: create-release
@@ -50,31 +27,21 @@ jobs:
       id: set_tag
       run: |
         tag=$(git rev-parse --short=8 ${{ github.sha }})
-        echo "::set-output name=tag::${tag}"
+        echo "tag=${tag}" >> $GITHUB_ENV
 
-    - name: Get release ID
-      id: get_release_id
-      run: echo "::set-output name=id::$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ steps.set_tag.outputs.tag }} | jq -r '.id')"
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Generate Changelog
+      run: echo "# Release Notes" > changelog.txt  # Replace this with your actual changelog content
 
-    - name: Upload binaries
-      uses: actions/upload-artifact@v4
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      if: ${{ github.ref == 'refs/heads/main' }}
       with:
-        name: Binaries
-        path: |
+        files: |
+          changelog.txt
           usernamegen-freebsd-x86_64
-
-    - name: Attach binaries to release
-      id: attach_artifacts
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/${{ github.repository }}/releases/${{ steps.get_release_id.outputs.id }}/assets?name=usernamegen-freebsd-x86_64
-        asset_path: usernamegen-freebsd-x86_64
-        asset_name: usernamegen-freebsd-x86_64
-        asset_content_type: application/octet-stream
+        body_path: changelog.txt
+        tag_name: ${{ env.tag }}
+        token: ${{ secrets.GITHUB_TOKEN }}
 
   build-linux:
     runs-on: ubuntu-latest
@@ -99,31 +66,21 @@ jobs:
       id: set_tag
       run: |
         tag=$(git rev-parse --short=8 ${{ github.sha }})
-        echo "::set-output name=tag::${tag}"
+        echo "tag=${tag}" >> $GITHUB_ENV
 
-    - name: Get release ID
-      id: get_release_id
-      run: echo "::set-output name=id::$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ steps.set_tag.outputs.tag }} | jq -r '.id')"
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Generate Changelog
+      run: echo "# Release Notes" > changelog.txt  # Replace this with your actual changelog content
 
-    - name: Upload binaries
-      uses: actions/upload-artifact@v4
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      if: ${{ github.ref == 'refs/heads/main' }}
       with:
-        name: Binaries
-        path: |
+        files: |
+          changelog.txt
           usernamegen-linux-x86_64
-
-    - name: Attach binaries to release
-      id: attach_artifacts
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/${{ github.repository }}/releases/${{ steps.get_release_id.outputs.id }}/assets?name=usernamegen-linux-x86_64
-        asset_path: usernamegen-linux-x86_64
-        asset_name: usernamegen-linux-x86_64
-        asset_content_type: application/octet-stream
+        body_path: changelog.txt
+        tag_name: ${{ env.tag }}
+        token: ${{ secrets.GITHUB_TOKEN }}
 
   build-macos:
     runs-on: macOS-latest
@@ -148,31 +105,21 @@ jobs:
       id: set_tag
       run: |
         tag=$(git rev-parse --short=8 ${{ github.sha }})
-        echo "::set-output name=tag::${tag}"
+        echo "tag=${tag}" >> $GITHUB_ENV
 
-    - name: Get release ID
-      id: get_release_id
-      run: echo "::set-output name=id::$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ steps.set_tag.outputs.tag }} | jq -r '.id')"
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Generate Changelog
+      run: echo "# Release Notes" > changelog.txt  # Replace this with your actual changelog content
 
-    - name: Upload binaries
-      uses: actions/upload-artifact@v4
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      if: ${{ github.ref == 'refs/heads/main' }}
       with:
-        name: Binaries
-        path: |
+        files: |
+          changelog.txt
           usernamegen-darwin-x86_64
-
-    - name: Attach binaries to release
-      id: attach_artifacts
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/${{ github.repository }}/releases/${{ steps.get_release_id.outputs.id }}/assets?name=usernamegen-darwin-x86_64
-        asset_path: usernamegen-darwin-x86_64
-        asset_name: usernamegen-darwin-x86_64
-        asset_content_type: application/octet-stream
+        body_path: changelog.txt
+        tag_name: ${{ env.tag }}
+        token: ${{ secrets.GITHUB_TOKEN }}
 
   build-macos-arm64:
     runs-on: macOS-latest
@@ -197,31 +144,21 @@ jobs:
       id: set_tag
       run: |
         tag=$(git rev-parse --short=8 ${{ github.sha }})
-        echo "::set-output name=tag::${tag}"
+        echo "tag=${tag}" >> $GITHUB_ENV
 
-    - name: Get release ID
-      id: get_release_id
-      run: echo "::set-output name=id::$(curl -s https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ steps.set_tag.outputs.tag }} | jq -r '.id')"
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Generate Changelog
+      run: echo "# Release Notes" > changelog.txt  # Replace this with your actual changelog content
 
-    - name: Upload binaries
-      uses: actions/upload-artifact@v4
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      if: ${{ github.ref == 'refs/heads/main' }}
       with:
-        name: Binaries
-        path: |
+        files: |
+          changelog.txt
           usernamegen-darwin-aarch64
-
-    - name: Attach binaries to release
-      id: attach_artifacts
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/${{ github.repository }}/releases/${{ steps.get_release_id.outputs.id }}/assets?name=usernamegen-darwin-aarch64
-        asset_path: usernamegen-darwin-aarch64
-        asset_name: usernamegen-darwin-aarch64
-        asset_content_type: application/octet-stream
+        body_path: changelog.txt
+        tag_name: ${{ env.tag }}
+        token: ${{ secrets.GITHUB_TOKEN }}
 
   build-windows:
     runs-on: windows-latest
@@ -236,44 +173,31 @@ jobs:
       with:
         toolchain: stable-msvc
 
+    - name: Set release tag
+      id: set_tag
+      shell: powershell
+      run: |
+        $tag = git rev-parse --short=8 $env:GITHUB_SHA
+        Add-Content $env:GITHUB_ENV "tag=$tag"
+
+    - name: Run tests for Windows x86-64
+      run: cargo test --target x86_64-pc-windows-msvc
+
     - name: Build for Windows x86-64
       run: |
         cargo build --release --target x86_64-pc-windows-msvc
         cp target/x86_64-pc-windows-msvc/release/rust-usernamegen.exe ./usernamegen-windows-x86_64.exe
 
-    - name: Set release tag
-      id: set_tag
-      shell: powershell
-      run: |
-        $tag = git rev-parse --short=8 ${{ github.sha }}
-        Write-Host "::set-output name=tag::$tag"
+    - name: Generate Changelog
+      run: echo "# Release Notes" > changelog.txt  # Replace this with your actual changelog content
 
-    - name: Get release ID
-      id: get_release_id
-      shell: powershell
-      run: |
-        $tag = '${{ steps.set_tag.outputs.tag }}'
-        $url = "https://api.github.com/repos/${{ github.repository }}/releases/tags/$tag"
-        $headers = @{ Authorization = "Bearer $env:GITHUB_TOKEN" }
-        $response = Invoke-RestMethod -Uri $url -Headers $headers -Method Get
-        Write-Output "::set-output name=id::$($response.id)"
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Upload binaries
-      uses: actions/upload-artifact@v4
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      if: ${{ github.ref == 'refs/heads/main' && !cancelled() }}
       with:
-        name: Binaries
-        path: |
+        files: |
+          changelog.txt
           usernamegen-windows-x86_64.exe
-
-    - name: Attach binaries to release
-      id: attach_artifacts
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: https://uploads.github.com/repos/${{ github.repository }}/releases/${{ steps.get_release_id.outputs.id }}/assets?name=usernamegen-windows-x86_64.exe
-        asset_path: usernamegen-windows-x86_64.exe
-        asset_name: usernamegen-windows-x86_64.exe
-        asset_content_type: application/octet-stream
+        body_path: changelog.txt
+        tag_name: ${{ env.tag }}
+        token: ${{ secrets.GITHUB_TOKEN }}
