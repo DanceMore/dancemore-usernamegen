@@ -1,4 +1,6 @@
-# rust-usernamegen
+# dancemore-usernamegen
+
+Rust port of a golang tool that generates usernames based on the $Adjective $Animal format.
 
 golang version from old, maybe I'll CICD it too... no sense in just deleting it tho.
 
